@@ -1,6 +1,9 @@
+import sys
+import pyaudiowpatch as pyaudio
+sys.modules['pyaudio'] = pyaudio
 import speech_recognition as sr
 from gtts import gTTS
-from playsound import playsound
+from playsound3 import playsound
 from pygame import mixer
 from io import BytesIO
 import os
