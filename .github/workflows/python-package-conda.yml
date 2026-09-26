@@ -1,4 +1,4 @@
-name: Python Package using Conda
+name: Python Application CI
 
 on:
   push:
@@ -7,40 +7,32 @@ on:
     branches: [ main ]
 
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 5
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-    # Use the official robust setup-miniconda action
-    - name: Set up Miniconda
-      uses: conda-incubator/setup-miniconda@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
       with:
-        auto-update-conda: true
         python-version: '3.10'
-        activate-environment: myenv
-        environment-file: environment.yml
-        use-mamba: true  # Uses mamba for drastically faster dependency resolution
 
-    # Verify installation and environment
-    - name: Check Conda Environment
+    - name: Install Dependencies
       run: |
-        conda info
-        conda list
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        # If you have custom requirements, this installs them safely:
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Lint with flake8
       run: |
-        # If flake8 isn't in environment.yml, install it into the active environment
-        conda install -y flake8
-        # stop the build if there are Python syntax errors or undefined names
+        # Stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings.
+        # Exit-zero treats all other errors as warnings
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
       run: |
-        conda install -y pytest
         pytest
